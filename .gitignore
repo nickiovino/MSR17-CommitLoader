@@ -1,0 +1,6 @@
+/target/
+*.bat
+*.jar
+dependency-reduced-pom.xml
+jooqgen.xml
+nbactions.xml

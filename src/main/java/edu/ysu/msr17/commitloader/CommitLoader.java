@@ -1,0 +1,209 @@
+package edu.ysu.msr17.commitloader;
+
+import com.google.common.net.HttpHeaders;
+import com.jcabi.github.Coordinates;
+import com.jcabi.github.Github;
+import com.jcabi.github.RepoCommit;
+import com.jcabi.github.RtGithub;
+import com.jcabi.github.wire.CarefulWire;
+import edu.ysu.msr17.commitloader.data.tables.DataCommits;
+import edu.ysu.msr17.commitloader.data.tables.DataJson;
+import edu.ysu.msr17.commitloader.data.tables.DataUsers;
+import edu.ysu.msr17.commitloader.data.tables.Travistorrent_6_12_2016;
+import edu.ysu.msr17.commitloader.data.tables.records.DataCommitsRecord;
+import edu.ysu.msr17.commitloader.data.tables.records.DataUsersRecord;
+import java.io.IOException;
+import java.net.SocketException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.json.JsonObject;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.SneakyThrows;
+import org.jooq.Cursor;
+import org.jooq.Record2;
+import org.jooq.exception.DataAccessException;
+import org.jooq.types.UInteger;
+
+@Getter( AccessLevel.PRIVATE )
+@Setter( AccessLevel.PRIVATE )
+public class CommitLoader
+{
+    public static final long MAX_DELAY = 3000000;
+    
+    public static final String USER_AGENT = "MSR17 Challenge Research (nickiovino nriovino@student.ysu.edu)";
+    
+    private final DBManager db;
+    
+    private final Collection<String> repos;
+    
+    private final Github github;
+    
+    private final Map<String, DataUsersRecord> userCache;
+   
+    public static void main( String[] args )
+    {
+        new CommitLoader( new DBManager( args[0], args[1], args[2] ), args[3], args[4].split( "," ) ).run();
+    }
+    
+    public CommitLoader( DBManager db, String token, String[] repos )
+    {
+        this.db = db;
+        
+        this.repos = new HashSet<>();
+        this.getRepos().addAll( Arrays.asList( repos ) );
+        
+        this.github = new RtGithub( new RtGithub().entry()
+                                                  .header( HttpHeaders.USER_AGENT, CommitLoader.USER_AGENT )
+                                                  .header( HttpHeaders.AUTHORIZATION, "token " + token )
+                                                  .header( HttpHeaders.ACCEPT, "application/vnd.github.v3+json, application/vnd.github.cryptographer-preview+json" )
+                                                  .through( CarefulWire.class, 50 ) );
+        
+        this.userCache = new HashMap<>();
+        
+        Logger.getLogger( CommitLoader.class.getName() ).log( Level.INFO, "Initialized CommitLoader" );
+    }
+    
+    public void run()
+    {
+        Logger.getLogger( CommitLoader.class.getName() ).log( Level.INFO, "Fetching records" );
+        
+        Cursor<Record2<String, String>> cursor = this.getDb().getContext().select( Travistorrent_6_12_2016.TRAVISTORRENT_6_12_2016.GH_PROJECT_NAME,
+                                                                                   Travistorrent_6_12_2016.TRAVISTORRENT_6_12_2016.GIT_TRIGGER_COMMIT )
+                                                                          .from( Travistorrent_6_12_2016.TRAVISTORRENT_6_12_2016 )
+                                                                          .leftJoin( DataCommits.DATA_COMMITS )
+                                                                          .on( Travistorrent_6_12_2016.TRAVISTORRENT_6_12_2016.GIT_TRIGGER_COMMIT.eq( DataCommits.DATA_COMMITS.SHA ) )
+                                                                          .where( Travistorrent_6_12_2016.TRAVISTORRENT_6_12_2016.GH_PROJECT_NAME.in( this.getRepos() ) )
+                                                                          .and( DataCommits.DATA_COMMITS.SHA.isNull() )
+                                                                          .groupBy( Travistorrent_6_12_2016.TRAVISTORRENT_6_12_2016.GH_PROJECT_NAME, 
+                                                                                    Travistorrent_6_12_2016.TRAVISTORRENT_6_12_2016.GIT_TRIGGER_COMMIT )
+                                                                          .fetchLazy();
+        
+        Logger.getLogger( CommitLoader.class.getName() ).log( Level.INFO, "Processing records" );
+        
+        while( cursor.hasNext() )
+        {
+            Record2<String, String> row = cursor.fetchOne();
+            
+            RepoCommit commit = this.getCommit( row.get( Travistorrent_6_12_2016.TRAVISTORRENT_6_12_2016.GH_PROJECT_NAME ),
+                                                row.get( Travistorrent_6_12_2016.TRAVISTORRENT_6_12_2016.GIT_TRIGGER_COMMIT ) );
+            
+            JsonObject json;
+            try
+            {
+                json = commit.json();
+            }
+            catch( IOException ex )
+            {
+                Logger.getLogger( CommitLoader.class.getName() ).log( Level.SEVERE, null, ex );
+                break;
+            }
+            
+            Logger.getLogger( CommitLoader.class.getName() ).log( Level.INFO, "Processing commit {0} -> {1}", new Object[]{ commit.toString(), json.toString() } );
+            
+            JsonObject jsonCommit = json.getJsonObject( "commit" );
+            JsonObject jsonCommitAuthor = jsonCommit.getJsonObject( "author" );
+            JsonObject jsonCommitCommitter = jsonCommit.getJsonObject( "committer" );
+            JsonObject jsonCommitVerification = jsonCommit.getJsonObject( "verification" );
+            JsonObject jsonAuthor = json.isNull( "author" ) ? null : json.getJsonObject( "author" );
+            JsonObject jsonCommitter = json.isNull( "committer" ) ? null : json.getJsonObject( "committer" );
+            JsonObject jsonStats = json.getJsonObject( "stats" );
+            
+            DataCommitsRecord commitRecord = this.getDb().getContext().newRecord( DataCommits.DATA_COMMITS );
+            commitRecord.setRepo( row.get( Travistorrent_6_12_2016.TRAVISTORRENT_6_12_2016.GH_PROJECT_NAME ) );
+            commitRecord.setSha( json.getString( "sha" ) );
+            commitRecord.setMessage( jsonCommit.getString( "message" ) );
+            commitRecord.setAuthor( this.getUser( jsonCommitAuthor.getString( "email" ), 
+                                                  jsonCommitAuthor.getString( "name" ), 
+                                                  jsonAuthor != null && jsonAuthor.containsKey( "id" ) ? jsonAuthor.getInt( "id" ) : null ).getId() );
+            commitRecord.setAuthorDate( Timestamp.valueOf( LocalDateTime.parse( jsonCommitAuthor.getString( "date" ).replaceFirst( "Z", "" ) ) ) );
+            commitRecord.setCommitter( this.getUser( jsonCommitCommitter.getString( "email" ), 
+                                                     jsonCommitCommitter.getString( "name" ), 
+                                                     jsonCommitter != null && jsonCommitter.containsKey( "id" ) ? jsonCommitter.getInt( "id" ) : null ).getId() );
+            commitRecord.setCommitDate( Timestamp.valueOf( LocalDateTime.parse( jsonCommitCommitter.getString( "date" ).replaceFirst( "Z", "" ) ) ) );
+            commitRecord.setVerified( jsonCommitVerification.getBoolean( "verified" ) == true ? (byte) 1 : (byte) 0 );
+            commitRecord.setVerifiedReason( jsonCommitVerification.getString( "reason" ) );
+            commitRecord.setAdded( UInteger.valueOf( jsonStats.getInt( "additions" ) ) );
+            commitRecord.setRemoved( UInteger.valueOf( jsonStats.getInt( "deletions" ) ) );
+            commitRecord.insert();
+            
+            try
+            {
+                // Murder my server's disks.
+                this.getDb().getContext().newRecord( DataJson.DATA_JSON )
+                                         .setId( commitRecord.getId() )
+                                         .setData( json.toString() )
+                                         .insert();
+            }
+            catch( DataAccessException ex )
+            {
+                Logger.getLogger( CommitLoader.class.getName() ).log( Level.SEVERE, "Couldn't store GitHub API response", ex );
+            }
+        }
+        
+        Logger.getLogger( CommitLoader.class.getName() ).log( Level.INFO, "Finished processing records" );
+    }
+    
+    @SneakyThrows( InterruptedException.class )
+    public RepoCommit getCommit( String repo, String commit )
+    {
+        long delay = 60000;
+        
+        while( true )
+        {
+            try
+            {
+                return this.getGithub().repos().get( new Coordinates.Simple( repo ) ).commits().get( commit );
+            }
+            catch( Exception ex )
+            {
+                if( !( ex instanceof SocketException ) )
+                {
+                    // Can't catch SocketException specifically, as it's not declared
+                    // to be thrown by the library.  Re-throw if we get something else.
+                    throw ex;
+                }
+                
+                Logger.getLogger( CommitLoader.class.getName() ).log( Level.WARNING, "Deferring next attempt to query GitHub API by " + delay/1000 + " seconds.", ex );
+                Thread.sleep( delay );
+                
+                if( delay < CommitLoader.MAX_DELAY )
+                {
+                    delay *= 2;
+                }
+            }
+        }
+    }
+    
+    public DataUsersRecord getUser( String email, String name, Integer id )
+    {
+        if( this.getUserCache().containsKey( email ) )
+        {
+            return this.getUserCache().get( email );
+        }
+        
+        DataUsersRecord user = this.getDb().getContext().selectFrom( DataUsers.DATA_USERS )
+                                                        .where( DataUsers.DATA_USERS.EMAIL.eq( email ) )
+                                                        .fetchOne();
+        
+        if( user == null )
+        {
+            user = this.getDb().getContext().newRecord( DataUsers.DATA_USERS )
+                                            .setEmail( email )
+                                            .setName( name )
+                                            .setGhId( id != null ? UInteger.valueOf( id ) : null );
+            user.store();
+        }
+        
+        this.getUserCache().put( email, user );
+        return user;
+    }
+}
