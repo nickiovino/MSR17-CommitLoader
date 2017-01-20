@@ -7,7 +7,7 @@ Gathers commit data for builds in a TravisTorrent database.
 How to run
 ----------
 
-1. Import `schema.sql` into a database containing TravisTorrent data utilizing the June 12th, 2016 format.
+1. Import `schema.sql` into a database containing TravisTorrent data utilizing the June 12th, 2016 format, in a table named `travistorrent_6_12_2016`.  The table will be altered, so no other applications should be utilizing it.
 2. Create a personal access token on GitHub, with only the `public_repo` scope: https://github.com/settings/tokens
 3. Run the application with the following arguments:
   1. The JDBC URL for the database (ex: `jdbc:mysql://hostname/dbname`)
