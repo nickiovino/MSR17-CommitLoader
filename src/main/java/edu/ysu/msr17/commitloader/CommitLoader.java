@@ -59,7 +59,10 @@ public class CommitLoader
     {
         this.db = db;
         
-        this.getDb().getContext().query( "SET NAMES 'utf8mb4' COLLATE 'utf8mb4_general_ci';" ).execute();
+        this.getDb().getContext().query( "SET character_set_client = utf8mb4;" ).execute();
+        this.getDb().getContext().query( "SET character_set_connection = utf8mb4;" ).execute();
+        this.getDb().getContext().query( "SET character_set_results = utf8mb4;" ).execute();
+        this.getDb().getContext().query( "SET collation_connection = utf8mb4_general_ci;" ).execute();
         Logger.getLogger( CommitLoader.class.getName() ).log( Level.INFO, "Connection-level encoding variables:\n{0}", this.getDb().getContext().fetch( "SHOW VARIABLES WHERE Variable_name LIKE 'character\\_set\\_%' OR Variable_name LIKE 'collation%';" ).toString() );
         
         this.repos = new HashSet<>();
