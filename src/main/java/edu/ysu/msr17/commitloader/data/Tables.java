@@ -14,6 +14,11 @@ package edu.ysu.msr17.commitloader.data;
 public class Tables {
 
 	/**
+	 * The table travistorrent.data_builds_condensed
+	 */
+	public static final edu.ysu.msr17.commitloader.data.tables.DataBuildsCondensed DATA_BUILDS_CONDENSED = edu.ysu.msr17.commitloader.data.tables.DataBuildsCondensed.DATA_BUILDS_CONDENSED;
+
+	/**
 	 * The table travistorrent.data_commits
 	 */
 	public static final edu.ysu.msr17.commitloader.data.tables.DataCommits DATA_COMMITS = edu.ysu.msr17.commitloader.data.tables.DataCommits.DATA_COMMITS;

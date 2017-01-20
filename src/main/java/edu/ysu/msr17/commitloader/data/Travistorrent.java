@@ -11,7 +11,7 @@ package edu.ysu.msr17.commitloader.data;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Travistorrent extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = 930734336;
+	private static final long serialVersionUID = -1248048465;
 
 	/**
 	 * The singleton instance of <code>travistorrent</code>
@@ -34,6 +34,7 @@ public class Travistorrent extends org.jooq.impl.SchemaImpl {
 
 	private final java.util.List<org.jooq.Table<?>> getTables0() {
 		return java.util.Arrays.<org.jooq.Table<?>>asList(
+			edu.ysu.msr17.commitloader.data.tables.DataBuildsCondensed.DATA_BUILDS_CONDENSED,
 			edu.ysu.msr17.commitloader.data.tables.DataCommits.DATA_COMMITS,
 			edu.ysu.msr17.commitloader.data.tables.DataJson.DATA_JSON,
 			edu.ysu.msr17.commitloader.data.tables.DataUsers.DATA_USERS,

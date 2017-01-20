@@ -11,7 +11,7 @@ package edu.ysu.msr17.commitloader.data.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Travistorrent_6_12_2016 extends org.jooq.impl.TableImpl<edu.ysu.msr17.commitloader.data.tables.records.Travistorrent_6_12_2016Record> {
 
-	private static final long serialVersionUID = -865035858;
+	private static final long serialVersionUID = 1961619896;
 
 	/**
 	 * The singleton instance of <code>travistorrent.travistorrent_6_12_2016</code>
@@ -34,7 +34,7 @@ public class Travistorrent_6_12_2016 extends org.jooq.impl.TableImpl<edu.ysu.msr
 	/**
 	 * The column <code>travistorrent.travistorrent_6_12_2016.gh_project_name</code>.
 	 */
-	public final org.jooq.TableField<edu.ysu.msr17.commitloader.data.tables.records.Travistorrent_6_12_2016Record, java.lang.String> GH_PROJECT_NAME = createField("gh_project_name", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+	public final org.jooq.TableField<edu.ysu.msr17.commitloader.data.tables.records.Travistorrent_6_12_2016Record, java.lang.String> GH_PROJECT_NAME = createField("gh_project_name", org.jooq.impl.SQLDataType.VARCHAR.length(100), this, "");
 
 	/**
 	 * The column <code>travistorrent.travistorrent_6_12_2016.gh_is_pr</code>.
@@ -84,7 +84,7 @@ public class Travistorrent_6_12_2016 extends org.jooq.impl.TableImpl<edu.ysu.msr
 	/**
 	 * The column <code>travistorrent.travistorrent_6_12_2016.git_prev_built_commit</code>.
 	 */
-	public final org.jooq.TableField<edu.ysu.msr17.commitloader.data.tables.records.Travistorrent_6_12_2016Record, java.lang.String> GIT_PREV_BUILT_COMMIT = createField("git_prev_built_commit", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+	public final org.jooq.TableField<edu.ysu.msr17.commitloader.data.tables.records.Travistorrent_6_12_2016Record, java.lang.String> GIT_PREV_BUILT_COMMIT = createField("git_prev_built_commit", org.jooq.impl.SQLDataType.CHAR.length(40), this, "");
 
 	/**
 	 * The column <code>travistorrent.travistorrent_6_12_2016.tr_prev_build</code>.
@@ -114,7 +114,7 @@ public class Travistorrent_6_12_2016 extends org.jooq.impl.TableImpl<edu.ysu.msr
 	/**
 	 * The column <code>travistorrent.travistorrent_6_12_2016.git_trigger_commit</code>.
 	 */
-	public final org.jooq.TableField<edu.ysu.msr17.commitloader.data.tables.records.Travistorrent_6_12_2016Record, java.lang.String> GIT_TRIGGER_COMMIT = createField("git_trigger_commit", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+	public final org.jooq.TableField<edu.ysu.msr17.commitloader.data.tables.records.Travistorrent_6_12_2016Record, java.lang.String> GIT_TRIGGER_COMMIT = createField("git_trigger_commit", org.jooq.impl.SQLDataType.CHAR.length(40), this, "");
 
 	/**
 	 * The column <code>travistorrent.travistorrent_6_12_2016.tr_virtual_merged_into</code>.
@@ -124,7 +124,7 @@ public class Travistorrent_6_12_2016 extends org.jooq.impl.TableImpl<edu.ysu.msr
 	/**
 	 * The column <code>travistorrent.travistorrent_6_12_2016.tr_original_commit</code>.
 	 */
-	public final org.jooq.TableField<edu.ysu.msr17.commitloader.data.tables.records.Travistorrent_6_12_2016Record, java.lang.String> TR_ORIGINAL_COMMIT = createField("tr_original_commit", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+	public final org.jooq.TableField<edu.ysu.msr17.commitloader.data.tables.records.Travistorrent_6_12_2016Record, java.lang.String> TR_ORIGINAL_COMMIT = createField("tr_original_commit", org.jooq.impl.SQLDataType.CHAR.length(40), this, "");
 
 	/**
 	 * The column <code>travistorrent.travistorrent_6_12_2016.gh_num_issue_comments</code>.

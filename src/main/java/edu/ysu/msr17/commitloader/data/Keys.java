@@ -25,7 +25,9 @@ public class Keys {
 	// UNIQUE and PRIMARY KEY definitions
 	// -------------------------------------------------------------------------
 
+	public static final org.jooq.UniqueKey<edu.ysu.msr17.commitloader.data.tables.records.DataBuildsCondensedRecord> KEY_DATA_BUILDS_CONDENSED_GH_PROJECT_NAME__GIT_TRIGGER_COMMIT = UniqueKeys0.KEY_DATA_BUILDS_CONDENSED_GH_PROJECT_NAME__GIT_TRIGGER_COMMIT;
 	public static final org.jooq.UniqueKey<edu.ysu.msr17.commitloader.data.tables.records.DataCommitsRecord> KEY_DATA_COMMITS_PRIMARY = UniqueKeys0.KEY_DATA_COMMITS_PRIMARY;
+	public static final org.jooq.UniqueKey<edu.ysu.msr17.commitloader.data.tables.records.DataCommitsRecord> KEY_DATA_COMMITS_DATA_COMMITS__REPO_SHA = UniqueKeys0.KEY_DATA_COMMITS_DATA_COMMITS__REPO_SHA;
 	public static final org.jooq.UniqueKey<edu.ysu.msr17.commitloader.data.tables.records.DataJsonRecord> KEY_DATA_JSON_PRIMARY = UniqueKeys0.KEY_DATA_JSON_PRIMARY;
 	public static final org.jooq.UniqueKey<edu.ysu.msr17.commitloader.data.tables.records.DataUsersRecord> KEY_DATA_USERS_PRIMARY = UniqueKeys0.KEY_DATA_USERS_PRIMARY;
 
@@ -47,7 +49,9 @@ public class Keys {
 	}
 
 	private static class UniqueKeys0 extends org.jooq.impl.AbstractKeys {
+		public static final org.jooq.UniqueKey<edu.ysu.msr17.commitloader.data.tables.records.DataBuildsCondensedRecord> KEY_DATA_BUILDS_CONDENSED_GH_PROJECT_NAME__GIT_TRIGGER_COMMIT = createUniqueKey(edu.ysu.msr17.commitloader.data.tables.DataBuildsCondensed.DATA_BUILDS_CONDENSED, edu.ysu.msr17.commitloader.data.tables.DataBuildsCondensed.DATA_BUILDS_CONDENSED.GH_PROJECT_NAME, edu.ysu.msr17.commitloader.data.tables.DataBuildsCondensed.DATA_BUILDS_CONDENSED.GIT_TRIGGER_COMMIT);
 		public static final org.jooq.UniqueKey<edu.ysu.msr17.commitloader.data.tables.records.DataCommitsRecord> KEY_DATA_COMMITS_PRIMARY = createUniqueKey(edu.ysu.msr17.commitloader.data.tables.DataCommits.DATA_COMMITS, edu.ysu.msr17.commitloader.data.tables.DataCommits.DATA_COMMITS.ID);
+		public static final org.jooq.UniqueKey<edu.ysu.msr17.commitloader.data.tables.records.DataCommitsRecord> KEY_DATA_COMMITS_DATA_COMMITS__REPO_SHA = createUniqueKey(edu.ysu.msr17.commitloader.data.tables.DataCommits.DATA_COMMITS, edu.ysu.msr17.commitloader.data.tables.DataCommits.DATA_COMMITS.REPO, edu.ysu.msr17.commitloader.data.tables.DataCommits.DATA_COMMITS.SHA);
 		public static final org.jooq.UniqueKey<edu.ysu.msr17.commitloader.data.tables.records.DataJsonRecord> KEY_DATA_JSON_PRIMARY = createUniqueKey(edu.ysu.msr17.commitloader.data.tables.DataJson.DATA_JSON, edu.ysu.msr17.commitloader.data.tables.DataJson.DATA_JSON.ID);
 		public static final org.jooq.UniqueKey<edu.ysu.msr17.commitloader.data.tables.records.DataUsersRecord> KEY_DATA_USERS_PRIMARY = createUniqueKey(edu.ysu.msr17.commitloader.data.tables.DataUsers.DATA_USERS, edu.ysu.msr17.commitloader.data.tables.DataUsers.DATA_USERS.ID);
 	}

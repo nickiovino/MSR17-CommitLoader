@@ -11,7 +11,7 @@ package edu.ysu.msr17.commitloader.data.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class DataCommits extends org.jooq.impl.TableImpl<edu.ysu.msr17.commitloader.data.tables.records.DataCommitsRecord> {
 
-	private static final long serialVersionUID = -3369949;
+	private static final long serialVersionUID = 1534392740;
 
 	/**
 	 * The singleton instance of <code>travistorrent.data_commits</code>
@@ -34,12 +34,12 @@ public class DataCommits extends org.jooq.impl.TableImpl<edu.ysu.msr17.commitloa
 	/**
 	 * The column <code>travistorrent.data_commits.repo</code>.
 	 */
-	public final org.jooq.TableField<edu.ysu.msr17.commitloader.data.tables.records.DataCommitsRecord, java.lang.String> REPO = createField("repo", org.jooq.impl.SQLDataType.VARCHAR.length(200).nullable(false), this, "");
+	public final org.jooq.TableField<edu.ysu.msr17.commitloader.data.tables.records.DataCommitsRecord, java.lang.String> REPO = createField("repo", org.jooq.impl.SQLDataType.VARCHAR.length(100).nullable(false), this, "");
 
 	/**
 	 * The column <code>travistorrent.data_commits.sha</code>.
 	 */
-	public final org.jooq.TableField<edu.ysu.msr17.commitloader.data.tables.records.DataCommitsRecord, java.lang.String> SHA = createField("sha", org.jooq.impl.SQLDataType.VARCHAR.length(40).nullable(false), this, "");
+	public final org.jooq.TableField<edu.ysu.msr17.commitloader.data.tables.records.DataCommitsRecord, java.lang.String> SHA = createField("sha", org.jooq.impl.SQLDataType.CHAR.length(40).nullable(false), this, "");
 
 	/**
 	 * The column <code>travistorrent.data_commits.message</code>.
@@ -129,7 +129,7 @@ public class DataCommits extends org.jooq.impl.TableImpl<edu.ysu.msr17.commitloa
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<edu.ysu.msr17.commitloader.data.tables.records.DataCommitsRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<edu.ysu.msr17.commitloader.data.tables.records.DataCommitsRecord>>asList(edu.ysu.msr17.commitloader.data.Keys.KEY_DATA_COMMITS_PRIMARY);
+		return java.util.Arrays.<org.jooq.UniqueKey<edu.ysu.msr17.commitloader.data.tables.records.DataCommitsRecord>>asList(edu.ysu.msr17.commitloader.data.Keys.KEY_DATA_COMMITS_PRIMARY, edu.ysu.msr17.commitloader.data.Keys.KEY_DATA_COMMITS_DATA_COMMITS__REPO_SHA);
 	}
 
 	/**
