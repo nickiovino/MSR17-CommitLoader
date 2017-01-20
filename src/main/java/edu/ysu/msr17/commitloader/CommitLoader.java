@@ -10,7 +10,6 @@ import edu.ysu.msr17.commitloader.data.tables.DataBuildsCondensed;
 import edu.ysu.msr17.commitloader.data.tables.DataCommits;
 import edu.ysu.msr17.commitloader.data.tables.DataJson;
 import edu.ysu.msr17.commitloader.data.tables.DataUsers;
-import edu.ysu.msr17.commitloader.data.tables.Travistorrent_6_12_2016;
 import edu.ysu.msr17.commitloader.data.tables.records.DataCommitsRecord;
 import edu.ysu.msr17.commitloader.data.tables.records.DataUsersRecord;
 import java.io.IOException;
@@ -99,13 +98,12 @@ public class CommitLoader
         {
             Record2<String, String> row = cursor.fetchOne();
             
-            RepoCommit commit = this.getCommit( row.get( DataBuildsCondensed.DATA_BUILDS_CONDENSED.GH_PROJECT_NAME ),
-                                                row.get( DataBuildsCondensed.DATA_BUILDS_CONDENSED.GIT_TRIGGER_COMMIT ) );
-            
-            JsonObject json;
+            CommitData commit;
             try
             {
-                json = commit.json();
+                commit = this.getCommit( row.get( DataBuildsCondensed.DATA_BUILDS_CONDENSED.GH_PROJECT_NAME ),
+                                         row.get( DataBuildsCondensed.DATA_BUILDS_CONDENSED.GIT_TRIGGER_COMMIT ) );
+                
             }
             catch( IOException ex )
             {
@@ -113,7 +111,9 @@ public class CommitLoader
                 break;
             }
             
-            Logger.getLogger( CommitLoader.class.getName() ).log( Level.INFO, "Processing commit {0} -> {1}", new Object[]{ commit.toString(), json.toString() } );
+            JsonObject json = commit.getJson();
+            
+            Logger.getLogger( CommitLoader.class.getName() ).log( Level.INFO, "Processing commit {0} -> {1}", new Object[]{ commit.getCommit().toString(), json.toString() } );
             
             JsonObject jsonCommit = json.getJsonObject( "commit" );
             JsonObject jsonCommitAuthor = jsonCommit.getJsonObject( "author" );
@@ -159,7 +159,7 @@ public class CommitLoader
     }
     
     @SneakyThrows( InterruptedException.class )
-    public RepoCommit getCommit( String repo, String commit )
+    public CommitData getCommit( String repo, String sha ) throws IOException
     {
         long delay = 60000;
         
@@ -167,9 +167,10 @@ public class CommitLoader
         {
             try
             {
-                return this.getGithub().repos().get( new Coordinates.Simple( repo ) ).commits().get( commit );
+                RepoCommit commit = this.getGithub().repos().get( new Coordinates.Simple( repo ) ).commits().get( sha );
+                return new CommitData( commit, commit.json() );
             }
-            catch( Exception ex )
+            catch( IOException ex )
             {
                 if( !( ex instanceof SocketException ) )
                 {
