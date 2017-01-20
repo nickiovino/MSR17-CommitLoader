@@ -6,6 +6,7 @@ import com.jcabi.github.Github;
 import com.jcabi.github.RepoCommit;
 import com.jcabi.github.RtGithub;
 import com.jcabi.github.wire.CarefulWire;
+import edu.ysu.msr17.commitloader.data.tables.DataBuildsCondensed;
 import edu.ysu.msr17.commitloader.data.tables.DataCommits;
 import edu.ysu.msr17.commitloader.data.tables.DataJson;
 import edu.ysu.msr17.commitloader.data.tables.DataUsers;
@@ -58,6 +59,9 @@ public class CommitLoader
     {
         this.db = db;
         
+        this.getDb().getContext().query( "SET NAMES 'utf8mb4' COLLATE 'utf8mb4_general_ci';" ).execute();
+        Logger.getLogger( CommitLoader.class.getName() ).log( Level.INFO, "Connection-level encoding variables:\n{0}", this.getDb().getContext().fetch( "SHOW VARIABLES WHERE Variable_name LIKE 'character\\_set\\_%' OR Variable_name LIKE 'collation%';" ).toString() );
+        
         this.repos = new HashSet<>();
         this.getRepos().addAll( Arrays.asList( repos ) );
         
@@ -76,15 +80,14 @@ public class CommitLoader
     {
         Logger.getLogger( CommitLoader.class.getName() ).log( Level.INFO, "Fetching records" );
         
-        Cursor<Record2<String, String>> cursor = this.getDb().getContext().select( Travistorrent_6_12_2016.TRAVISTORRENT_6_12_2016.GH_PROJECT_NAME,
-                                                                                   Travistorrent_6_12_2016.TRAVISTORRENT_6_12_2016.GIT_TRIGGER_COMMIT )
-                                                                          .from( Travistorrent_6_12_2016.TRAVISTORRENT_6_12_2016 )
+        Cursor<Record2<String, String>> cursor = this.getDb().getContext().select( DataBuildsCondensed.DATA_BUILDS_CONDENSED.GH_PROJECT_NAME,
+                                                                                   DataBuildsCondensed.DATA_BUILDS_CONDENSED.GIT_TRIGGER_COMMIT )
+                                                                          .from( DataBuildsCondensed.DATA_BUILDS_CONDENSED )
                                                                           .leftJoin( DataCommits.DATA_COMMITS )
-                                                                          .on( Travistorrent_6_12_2016.TRAVISTORRENT_6_12_2016.GIT_TRIGGER_COMMIT.eq( DataCommits.DATA_COMMITS.SHA ) )
-                                                                          .where( Travistorrent_6_12_2016.TRAVISTORRENT_6_12_2016.GH_PROJECT_NAME.in( this.getRepos() ) )
+                                                                          .on( DataBuildsCondensed.DATA_BUILDS_CONDENSED.GH_PROJECT_NAME.eq( DataCommits.DATA_COMMITS.REPO ) )
+                                                                          .and( DataBuildsCondensed.DATA_BUILDS_CONDENSED.GIT_TRIGGER_COMMIT.eq( DataCommits.DATA_COMMITS.SHA ) )
+                                                                          .where( DataBuildsCondensed.DATA_BUILDS_CONDENSED.GH_PROJECT_NAME.in( this.getRepos() ) )
                                                                           .and( DataCommits.DATA_COMMITS.SHA.isNull() )
-                                                                          .groupBy( Travistorrent_6_12_2016.TRAVISTORRENT_6_12_2016.GH_PROJECT_NAME, 
-                                                                                    Travistorrent_6_12_2016.TRAVISTORRENT_6_12_2016.GIT_TRIGGER_COMMIT )
                                                                           .fetchLazy();
         
         Logger.getLogger( CommitLoader.class.getName() ).log( Level.INFO, "Processing records" );
@@ -93,8 +96,8 @@ public class CommitLoader
         {
             Record2<String, String> row = cursor.fetchOne();
             
-            RepoCommit commit = this.getCommit( row.get( Travistorrent_6_12_2016.TRAVISTORRENT_6_12_2016.GH_PROJECT_NAME ),
-                                                row.get( Travistorrent_6_12_2016.TRAVISTORRENT_6_12_2016.GIT_TRIGGER_COMMIT ) );
+            RepoCommit commit = this.getCommit( row.get( DataBuildsCondensed.DATA_BUILDS_CONDENSED.GH_PROJECT_NAME ),
+                                                row.get( DataBuildsCondensed.DATA_BUILDS_CONDENSED.GIT_TRIGGER_COMMIT ) );
             
             JsonObject json;
             try
@@ -118,7 +121,7 @@ public class CommitLoader
             JsonObject jsonStats = json.getJsonObject( "stats" );
             
             DataCommitsRecord commitRecord = this.getDb().getContext().newRecord( DataCommits.DATA_COMMITS );
-            commitRecord.setRepo( row.get( Travistorrent_6_12_2016.TRAVISTORRENT_6_12_2016.GH_PROJECT_NAME ) );
+            commitRecord.setRepo( row.get( DataBuildsCondensed.DATA_BUILDS_CONDENSED.GH_PROJECT_NAME ) );
             commitRecord.setSha( json.getString( "sha" ) );
             commitRecord.setMessage( jsonCommit.getString( "message" ) );
             commitRecord.setAuthor( this.getUser( jsonCommitAuthor.getString( "email" ), 
