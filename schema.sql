@@ -10,8 +10,8 @@
 
 CREATE TABLE `data_commits` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `repo` varchar(200) NOT NULL,
-  `sha` varchar(40) NOT NULL,
+  `repo` varchar(100) CHARACTER SET latin1 NOT NULL,
+  `sha` char(40) NOT NULL,
   `message` text,
   `author` int(10) unsigned DEFAULT NULL,
   `author_date` datetime DEFAULT NULL,
@@ -22,6 +22,7 @@ CREATE TABLE `data_commits` (
   `added` mediumint(8) unsigned DEFAULT '0',
   `removed` mediumint(8) unsigned DEFAULT '0',
   PRIMARY KEY (`id`),
+  UNIQUE KEY `data_commits__repo_sha` (`repo`,`sha`),
   KEY `FK_data_commits__author` (`author`),
   KEY `FK_data_commits__committer` (`committer`),
   CONSTRAINT `FK_data_commits__author` FOREIGN KEY (`author`) REFERENCES `data_users` (`id`),
@@ -46,6 +47,16 @@ CREATE TABLE `data_users` (
   `gh_id` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=382 DEFAULT CHARSET=utf8mb4;
+
+
+
+ALTER TABLE `travistorrent_6_12_2016` CHANGE `gh_project_name` `gh_project_name` varchar(100), CHANGE `git_prev_build_commit` `git_prev_build_commit` char(40), CHANGE `git_trigger_commit` `git_trigger_commit` char(40), CHANGE `tr_original_commit` `tr_original_commit` char(40);
+
+ALTER TABLE `travistorrent_6_12_2016` ADD INDEX `gh_project_name__git_trigger_commit` (`gh_project_name`, `git_trigger_commit`); 
+
+CREATE TABLE `data_builds_condensed` AS ( SELECT `gh_project_name`, `git_trigger_commit` FROM `travistorrent_6_12_2016` GROUP BY `gh_project_name`, `git_trigger_commit` );
+
+ALTER TABLE `data_builds_condensed` ADD UNIQUE `gh_project_name__git_trigger_commit` (`gh_project_name`, `git_trigger_commit`);
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
