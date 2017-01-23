@@ -49,28 +49,10 @@ public class CommitLoader
     private final Github github;
     
     private final Map<String, DataUsersRecord> userCache;
-   
-    public static void main( String[] args )
-    {
-        if( args.length == 5 )
-        {
-            new CommitLoader( new DBManager( args[0], args[1], args[2] ), args[3], args[4].split( "," ) ).run();
-        }
-        else if( args.length == 4 )
-        {
-            new CommitLoader( new DBManager( args[0], args[1], args[2] ), args[3] ).run();
-        }
-    }
     
     public CommitLoader( DBManager db, String token )
     {
         this.db = db;
-        
-        this.getDb().getContext().query( "SET character_set_client = utf8mb4;" ).execute();
-        this.getDb().getContext().query( "SET character_set_connection = utf8mb4;" ).execute();
-        this.getDb().getContext().query( "SET character_set_results = utf8mb4;" ).execute();
-        this.getDb().getContext().query( "SET collation_connection = utf8mb4_general_ci;" ).execute();
-        Logger.getLogger( CommitLoader.class.getName() ).log( Level.INFO, "Connection-level encoding variables:\n{0}", this.getDb().getContext().fetch( "SHOW VARIABLES WHERE Variable_name LIKE 'character\\_set\\_%' OR Variable_name LIKE 'collation%';" ).toString() );
         
         this.repos = new HashSet<>();
         

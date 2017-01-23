@@ -44,9 +44,18 @@ public class DBManager
         
         this.setJooqConfig( new DefaultConfiguration().set( this.getPool() )
                                                       .set( SQLDialect.MYSQL ) );
+        
+        // Forcibly set the connection-level character set variables to utf8mb4.
+        // SET NAMES is not used due to an issue with the MySQL Java Connector.
+        this.getContext().query( "SET character_set_client = utf8mb4;" ).execute();
+        this.getContext().query( "SET character_set_connection = utf8mb4;" ).execute();
+        this.getContext().query( "SET character_set_results = utf8mb4;" ).execute();
+        this.getContext().query( "SET collation_connection = utf8mb4_general_ci;" ).execute();
+        Logger.getLogger( DBManager.class.getName() ).log( Level.INFO, "Connection-level encoding variables:\n{0}", this.getContext().fetch( "SHOW VARIABLES WHERE Variable_name LIKE 'character\\_set\\_%' OR Variable_name LIKE 'collation%';" ).toString() );
+        
     }
     
-    public DSLContext getContext()
+    public final DSLContext getContext()
     {
         return DSL.using( this.getJooqConfig() );
     }
