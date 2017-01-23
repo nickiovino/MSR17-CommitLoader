@@ -30,6 +30,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import org.jooq.Cursor;
 import org.jooq.Record2;
+import org.jooq.SelectConditionStep;
 import org.jooq.exception.DataAccessException;
 import org.jooq.types.UInteger;
 
@@ -51,10 +52,17 @@ public class CommitLoader
    
     public static void main( String[] args )
     {
-        new CommitLoader( new DBManager( args[0], args[1], args[2] ), args[3], args[4].split( "," ) ).run();
+        if( args.length == 5 )
+        {
+            new CommitLoader( new DBManager( args[0], args[1], args[2] ), args[3], args[4].split( "," ) ).run();
+        }
+        else if( args.length == 4 )
+        {
+            new CommitLoader( new DBManager( args[0], args[1], args[2] ), args[3] ).run();
+        }
     }
     
-    public CommitLoader( DBManager db, String token, String[] repos )
+    public CommitLoader( DBManager db, String token )
     {
         this.db = db;
         
@@ -65,7 +73,6 @@ public class CommitLoader
         Logger.getLogger( CommitLoader.class.getName() ).log( Level.INFO, "Connection-level encoding variables:\n{0}", this.getDb().getContext().fetch( "SHOW VARIABLES WHERE Variable_name LIKE 'character\\_set\\_%' OR Variable_name LIKE 'collation%';" ).toString() );
         
         this.repos = new HashSet<>();
-        this.getRepos().addAll( Arrays.asList( repos ) );
         
         this.github = new RtGithub( new RtGithub().entry()
                                                   .header( HttpHeaders.USER_AGENT, CommitLoader.USER_AGENT )
@@ -78,19 +85,30 @@ public class CommitLoader
         Logger.getLogger( CommitLoader.class.getName() ).log( Level.INFO, "Initialized CommitLoader" );
     }
     
+    public CommitLoader( DBManager db, String token, String[] repos )
+    {
+        this( db, token );
+        this.getRepos().addAll( Arrays.asList( repos ) );
+    }
+    
     public void run()
     {
         Logger.getLogger( CommitLoader.class.getName() ).log( Level.INFO, "Fetching records" );
         
-        Cursor<Record2<String, String>> cursor = this.getDb().getContext().select( DataBuildsCondensed.DATA_BUILDS_CONDENSED.GH_PROJECT_NAME,
-                                                                                   DataBuildsCondensed.DATA_BUILDS_CONDENSED.GIT_TRIGGER_COMMIT )
-                                                                          .from( DataBuildsCondensed.DATA_BUILDS_CONDENSED )
-                                                                          .leftJoin( DataCommits.DATA_COMMITS )
-                                                                          .on( DataBuildsCondensed.DATA_BUILDS_CONDENSED.GH_PROJECT_NAME.eq( DataCommits.DATA_COMMITS.REPO ) )
-                                                                          .and( DataBuildsCondensed.DATA_BUILDS_CONDENSED.GIT_TRIGGER_COMMIT.eq( DataCommits.DATA_COMMITS.SHA ) )
-                                                                          .where( DataBuildsCondensed.DATA_BUILDS_CONDENSED.GH_PROJECT_NAME.in( this.getRepos() ) )
-                                                                          .and( DataCommits.DATA_COMMITS.SHA.isNull() )
-                                                                          .fetchLazy();
+        SelectConditionStep<Record2<String, String>> query = this.getDb().getContext().select( DataBuildsCondensed.DATA_BUILDS_CONDENSED.GH_PROJECT_NAME,
+                                                                                               DataBuildsCondensed.DATA_BUILDS_CONDENSED.GIT_TRIGGER_COMMIT )
+                                                                                      .from( DataBuildsCondensed.DATA_BUILDS_CONDENSED )
+                                                                                      .leftJoin( DataCommits.DATA_COMMITS )
+                                                                                      .on( DataBuildsCondensed.DATA_BUILDS_CONDENSED.GH_PROJECT_NAME.eq( DataCommits.DATA_COMMITS.REPO ) )
+                                                                                      .and( DataBuildsCondensed.DATA_BUILDS_CONDENSED.GIT_TRIGGER_COMMIT.eq( DataCommits.DATA_COMMITS.SHA ) )
+                                                                                      .where( DataCommits.DATA_COMMITS.SHA.isNull() );
+        
+        if( !this.getRepos().isEmpty() )
+        {
+            query = query.and( DataBuildsCondensed.DATA_BUILDS_CONDENSED.GH_PROJECT_NAME.in( this.getRepos() ) );
+        }
+        
+        Cursor<Record2<String, String>> cursor = query.fetchLazy();
         
         Logger.getLogger( CommitLoader.class.getName() ).log( Level.INFO, "Processing records" );
         
