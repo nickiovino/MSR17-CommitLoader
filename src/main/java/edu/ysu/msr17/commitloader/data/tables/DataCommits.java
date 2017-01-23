@@ -11,7 +11,7 @@ package edu.ysu.msr17.commitloader.data.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class DataCommits extends org.jooq.impl.TableImpl<edu.ysu.msr17.commitloader.data.tables.records.DataCommitsRecord> {
 
-	private static final long serialVersionUID = 1534392740;
+	private static final long serialVersionUID = 1276702649;
 
 	/**
 	 * The singleton instance of <code>travistorrent.data_commits</code>
@@ -85,6 +85,21 @@ public class DataCommits extends org.jooq.impl.TableImpl<edu.ysu.msr17.commitloa
 	 * The column <code>travistorrent.data_commits.removed</code>.
 	 */
 	public final org.jooq.TableField<edu.ysu.msr17.commitloader.data.tables.records.DataCommitsRecord, org.jooq.types.UInteger> REMOVED = createField("removed", org.jooq.impl.SQLDataType.INTEGERUNSIGNED.defaulted(true), this, "");
+
+	/**
+	 * The column <code>travistorrent.data_commits.ss_gen_positive</code>.
+	 */
+	public final org.jooq.TableField<edu.ysu.msr17.commitloader.data.tables.records.DataCommitsRecord, java.lang.Byte> SS_GEN_POSITIVE = createField("ss_gen_positive", org.jooq.impl.SQLDataType.TINYINT, this, "");
+
+	/**
+	 * The column <code>travistorrent.data_commits.ss_gen_negative</code>.
+	 */
+	public final org.jooq.TableField<edu.ysu.msr17.commitloader.data.tables.records.DataCommitsRecord, java.lang.Byte> SS_GEN_NEGATIVE = createField("ss_gen_negative", org.jooq.impl.SQLDataType.TINYINT, this, "");
+
+	/**
+	 * The column <code>travistorrent.data_commits.ss_gen_neutral</code>.
+	 */
+	public final org.jooq.TableField<edu.ysu.msr17.commitloader.data.tables.records.DataCommitsRecord, java.lang.Byte> SS_GEN_NEUTRAL = createField("ss_gen_neutral", org.jooq.impl.SQLDataType.TINYINT, this, "");
 
 	/**
 	 * Create a <code>travistorrent.data_commits</code> table reference
